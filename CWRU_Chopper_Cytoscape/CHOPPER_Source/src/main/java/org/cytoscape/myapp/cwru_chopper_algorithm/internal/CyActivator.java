@@ -54,7 +54,8 @@ public class CyActivator extends AbstractCyActivator {
 		Properties properties = new Properties();
 		properties.put(ServiceProperties.PREFERRED_MENU, ServiceProperties.APPS_MENU);
 		properties.put(ServiceProperties.TITLE, "CWRU ChopperAlgorithm");
-		registerService(context, new ChopperNetworkTaskFactory(null, cyNM, cyNN, cyNF), NetworkTaskFactory.class, properties);
+		registerService(context, new ChopperNetworkTaskFactory(null, cyNM, cyNN, cyNF), 
+				NetworkTaskFactory.class, properties);
 	}
 
 }
