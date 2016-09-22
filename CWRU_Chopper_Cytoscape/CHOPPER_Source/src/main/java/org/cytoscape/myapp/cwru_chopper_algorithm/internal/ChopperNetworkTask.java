@@ -308,8 +308,8 @@ public class ChopperNetworkTask extends AbstractTask{
 			ErrorBound = ErrorBound * Xi;
 			muPPrevious = muPrevious;
 			muPrevious = mu;
-	        mPPreviousScore = mPreviousScore;
-	        mPreviousScore = mScore;
+	        	mPPreviousScore = mPreviousScore;
+	        	mPreviousScore = mScore;
 			
 			if (iter == MAXIT || ErrorBound < THRESHOLD){
 				break;
