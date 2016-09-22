@@ -1,4 +1,4 @@
-%  Convert your Binary-Symmetric Undirected Dataset to Adjacency Matrix
+%  Convert your Binary-Symmetric Undirected Graph Dataset to Adjacency Matrix
 %  Matrix to be used must be column-normalized.
 
 Data = load('Email-Enron.mat');
