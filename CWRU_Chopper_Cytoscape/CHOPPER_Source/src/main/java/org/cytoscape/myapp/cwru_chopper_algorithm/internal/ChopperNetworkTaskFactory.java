@@ -37,10 +37,8 @@ public class ChopperNetworkTaskFactory implements NetworkTaskFactory {
 	private final CyNetworkNaming namingUtil;
 
 	
-	public ChopperNetworkTaskFactory(CyNetwork cN, 
-									final CyNetworkManager netMgr, 
-									final CyNetworkNaming namingUtil,
-									final CyNetworkFactory cnf){
+	public ChopperNetworkTaskFactory(CyNetwork cN, final CyNetworkManager netMgr, 
+					final CyNetworkNaming namingUtil, final CyNetworkFactory cnf){
 		
 		this.netMgr = netMgr;
 		this.namingUtil = namingUtil;
