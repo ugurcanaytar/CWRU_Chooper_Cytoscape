@@ -54,7 +54,7 @@ import cern.colt.matrix.doublealgo.Sorting;
 
 /*
  * 
- * 				/\ PARALLEL COLT PACKAGES /\
+ * 		      /\ PARALLEL COLT PACKAGES /\
 	import cern.colt.function.tdouble.DoubleDoubleFunction;
 	import cern.colt.matrix.tdouble.DoubleMatrix1D;
 	import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix1D;
@@ -127,7 +127,8 @@ public class ChopperNetworkTask extends AbstractTask{
 	@Tunable(description= "Enter K: ", groups={"Top-K Result"})
 	public int K = 10;
 	
-	public ChopperNetworkTask(CyNetwork network, CyNetworkManager netMgr, CyNetworkFactory cnf, CyNetworkNaming namingUtil){
+	public ChopperNetworkTask(CyNetwork network, CyNetworkManager netMgr, 
+				  CyNetworkFactory cnf, CyNetworkNaming namingUtil){
 		
 		this.network = network;
 		this.netMgr = netMgr;
@@ -359,7 +360,7 @@ public class ChopperNetworkTask extends AbstractTask{
 		
 		resultMatHelper = Sorting.quickSort.sort(mScore);
 		/*
-		 * 			Sorting at Parallel Colt
+		 * 		Sorting at Parallel Colt
 		 * resultMatHelper = DoubleSorting.mergeSort.sort(mScore2);
 		 * 
 		 */
@@ -385,7 +386,7 @@ public class ChopperNetworkTask extends AbstractTask{
 		DoubleMatrix1D sortedVec = new DenseDoubleMatrix1D(sizeNetwork);
 		sortedVec = Sorting.quickSort.sort(finalVec);
 		/*
-		 * 			Sorting at Parallel Colt
+		 * 		Sorting at Parallel Colt
 		 * sortedVec = DoubleSorting.mergeSort.sort(finalVec);
 		 * 
 		 */
