@@ -9,5 +9,5 @@ Despite the old version, Q-Node will be coloured with Red and Diamond shape. <br
 Top-K nodes will be coloured with Blue and Direct-Neighbours will be coloured with Green both in a Triangular shape. <br />
 
 <p align="center">
-![alt tag](https://postimg.org/image/53mzpi251/)
+![alt tag](https://s10.postimg.org/twwjq5l5l/Example_Network.png)
 </p>
