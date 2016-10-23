@@ -10,4 +10,5 @@ Top-K nodes will be coloured with Blue and Direct-Neighbours will be coloured wi
 
 <p align="center">
 ![Screenshot](ExampleNetwork.png)
+
 </p>
