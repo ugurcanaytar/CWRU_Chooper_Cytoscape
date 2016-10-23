@@ -10,5 +10,5 @@ Top-K nodes will be coloured with Blue and Direct-Neighbours will be coloured wi
 
 
 <p align="center">
-  <img src="https://github.com/ugurcanaytar/CWRU_Chopper_Cytoscape/blob/master/ExampleNetwork.png""/>
+  <img src="https://github.com/ugurcanaytar/CWRU_Chopper_Cytoscape/blob/master/CWRU_Chopper_Cytoscape/Example_Datasets/Enron-Email/ExampleNetwork.png""/>
 </p>
