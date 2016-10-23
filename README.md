@@ -7,9 +7,11 @@ Case Western Reserve University, Cleveland, OH. <br />
 **Update**: Users of the Chopper Plug-in can determine the node visualization properties by their own. <br />
 
 <p align="center">
-  <img src="https://github.com/ugurcanaytar/CWRU_Chopper_Cytoscape/blob/master/CWRU_Chopper_Cytoscape/Example_Datasets/Enron-Email/Parameter.png""/>
+  <img src="https://github.com/ugurcanaytar/CWRU_Chopper_Cytoscape/blob/master/CWRU_Chopper_Cytoscape/Example_Datasets/Enron-Email/ParameterResult.png""/>
 </p>
 
 <p align="center">
-  <img src="https://github.com/ugurcanaytar/CWRU_Chopper_Cytoscape/blob/master/CWRU_Chopper_Cytoscape/Example_Datasets/Enron-Email/ParameterResult.png""/>
+  <img src="https://github.com/ugurcanaytar/CWRU_Chopper_Cytoscape/blob/master/CWRU_Chopper_Cytoscape/Example_Datasets/Enron-Email/Parameter.png""/>
 </p>
+
+
