@@ -162,8 +162,8 @@ public class ChopperNetworkTask extends AbstractTask{
 	public ListSingleSelection<String> dirShape = new ListSingleSelection<>("DIAMOND", "ELLIPSE", "HEXAGON", "OCTAGON", "RECTANGLE", "TRIANGLE");
 	
 	public ChopperNetworkTask(CyNetwork network, CyNetworkManager netMgr, CyNetworkFactory cnf, 
-							 CyNetworkNaming namingUtil, CyNetworkView viewNetwork, CyNetworkViewFactory viewFactory,
-							 CyNetworkViewManager viewManager,CyLayoutAlgorithmManager cyLayoutManager){
+				  CyNetworkNaming namingUtil, CyNetworkView viewNetwork, CyNetworkViewFactory viewFactory,
+				  CyNetworkViewManager viewManager,CyLayoutAlgorithmManager cyLayoutManager){
 		
 		this.cyLayoutManager = cyLayoutManager;
 		this.network = network;
@@ -380,8 +380,8 @@ public class ChopperNetworkTask extends AbstractTask{
 			ErrorBound = ErrorBound * Xi;
 			muPPrevious = muPrevious;
 			muPrevious = mu;
-	        mPPreviousScore = mPreviousScore;
-	        mPreviousScore = mScore;
+	        	mPPreviousScore = mPreviousScore;
+	        	mPreviousScore = mScore;
 			
 			if (iter == MAXIT || ErrorBound < THRESHOLD){
 				break;
