@@ -7,7 +7,7 @@
 Case Western Reserve University, Cleveland, OH. <br />
 
 **Work Done:** <br />
-Efficient processing of network proximityqueries via Chebyshev acceleration. <br />
+Efficient processing of network proximity queries via Chebyshev acceleration. <br />
 **M. Coskun , A. Grama, and M. Koyuturk.** <br /> 
 *ACM SIGKDD Conf. Knowledge Discovery and Data Mining (KDD), 22, 2016* <br />
 Paper: http://www.kdd.org/kdd2016/papers/files/rpp0347-coskunA.pdf <br />
