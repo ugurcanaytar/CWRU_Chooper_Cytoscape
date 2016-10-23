@@ -28,6 +28,7 @@ import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.myapp.cwru_chopper_algorithm.internal.ChopperNetworkTask;
 import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.task.NetworkTaskFactory;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -41,14 +42,16 @@ public class ChopperNetworkTaskFactory implements NetworkTaskFactory {
 	private CyNetworkView viewNetwork;
 	private CyNetworkViewFactory viewFactory;
 	private CyNetworkViewManager viewManager;
+	private final CyLayoutAlgorithmManager cyLayoutManager;
 	
 	public ChopperNetworkTaskFactory(CyNetwork cN, 
-					final CyNetworkManager netMgr, 
-					final CyNetworkNaming namingUtil,
-					final CyNetworkFactory cnf,
-					CyNetworkView viewNetwork,
-					CyNetworkViewFactory viewFactory,
-					CyNetworkViewManager viewManager){
+									final CyNetworkManager netMgr, 
+									final CyNetworkNaming namingUtil,
+									final CyNetworkFactory cnf,
+									CyNetworkView viewNetwork,
+									CyNetworkViewFactory viewFactory,
+									CyNetworkViewManager viewManager,
+									CyLayoutAlgorithmManager cyLayoutManager){
 		
 		this.netMgr = netMgr;
 		this.namingUtil = namingUtil;
@@ -56,11 +59,12 @@ public class ChopperNetworkTaskFactory implements NetworkTaskFactory {
 		this.viewNetwork = viewNetwork;
 		this.viewFactory = viewFactory;
 		this.viewManager = viewManager;
+		this.cyLayoutManager = cyLayoutManager;
 	}
 	
 	@Override
 	public TaskIterator createTaskIterator(CyNetwork network) {
-		return new TaskIterator(new ChopperNetworkTask(network, netMgr, cnf, namingUtil, viewNetwork, viewFactory, viewManager));
+		return new TaskIterator(new ChopperNetworkTask(network, netMgr, cnf, namingUtil, viewNetwork, viewFactory, viewManager, cyLayoutManager));
 	}
 
 	@Override

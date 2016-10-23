@@ -30,6 +30,7 @@ import org.cytoscape.myapp.cwru_chopper_algorithm.internal.ChopperNetworkTaskFac
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.task.NetworkTaskFactory;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -49,11 +50,12 @@ public class CyActivator extends AbstractCyActivator {
 		CyNetworkView cNN = getService(context, CyNetworkView.class);
 		CyNetworkViewFactory cNVF = getService(context, CyNetworkViewFactory.class);
 		CyNetworkViewManager cVM = getService(context, CyNetworkViewManager.class);
+		CyLayoutAlgorithmManager cALM = getService(context, CyLayoutAlgorithmManager.class);
 		
 		Properties properties = new Properties();
 		properties.put(ServiceProperties.PREFERRED_MENU, ServiceProperties.APPS_MENU);
 		properties.put(ServiceProperties.TITLE, "CWRU ChopperAlgorithm");
-		registerService(context, new ChopperNetworkTaskFactory(null, cyNM, cyNN, cyNF, cNN, cNVF, cVM), NetworkTaskFactory.class, properties);
+		registerService(context, new ChopperNetworkTaskFactory(null, cyNM, cyNN, cyNF, cNN, cNVF, cVM, cALM), NetworkTaskFactory.class, properties);
 	}
 
 }

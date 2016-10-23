@@ -22,6 +22,7 @@
 
 package org.cytoscape.myapp.cwru_chopper_algorithm.internal;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,6 +40,8 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.session.CyNetworkNaming;
+import org.cytoscape.view.layout.CyLayoutAlgorithm;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -46,8 +49,11 @@ import org.cytoscape.view.model.View;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.Task;
+import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
+import org.cytoscape.work.util.ListSingleSelection;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -88,7 +94,7 @@ public class ChopperNetworkTask extends AbstractTask{
 	private CyNetworkView viewNetwork;
 	private CyNetworkViewFactory viewFactory;
 	private CyNetworkViewManager viewManager;
-	
+	private final CyLayoutAlgorithmManager cyLayoutManager;
 	
 	/* IN-EQUATION PARAMETERS */
 	
@@ -137,10 +143,29 @@ public class ChopperNetworkTask extends AbstractTask{
 	@Tunable(description= "Enter K: ", groups={"Top-K Result"})
 	public int K = 10;
 	
+	@Tunable(description = "Query Node Color Choice:", groups={"Query Node Visualization"})
+	public ListSingleSelection<String> qColor = new ListSingleSelection<>("BLACK", "BLUE", "CYAN", "MAGENTA", "ORANGE", "RED", "GRAY");
+	
+	@Tunable(description = "Query Node Shape Choice:", groups={"Query Node Visualization"})
+	public ListSingleSelection<String> qShape = new ListSingleSelection<>("DIAMOND", "ELLIPSE", "HEXAGON", "OCTAGON", "RECTANGLE", "TRIANGLE");
+	
+	@Tunable(description = "Top-K Nodes Color Choice:", groups={"Top-K Nodes Visualization"})
+	public ListSingleSelection<String> topColor = new ListSingleSelection<>("BLACK", "BLUE", "CYAN", "MAGENTA", "ORANGE", "RED", "GRAY");
+	
+	@Tunable(description = "Top-K Nodes Shape Choice:", groups={"Top-K Nodes Visualization"})
+	public ListSingleSelection<String> topShape = new ListSingleSelection<>("DIAMOND", "ELLIPSE", "HEXAGON", "OCTAGON", "RECTANGLE", "TRIANGLE");
+	
+	@Tunable(description = "Direct Neighbours Color Choice:", groups={"Direct Neighbours Visualization"})
+	public ListSingleSelection<String> dirColor = new ListSingleSelection<>("BLACK", "BLUE", "CYAN", "MAGENTA", "ORANGE", "RED", "GRAY");
+	
+	@Tunable(description = "Direct Neighbours Shape Choice:", groups={"Direct Neighbours Visualization"})
+	public ListSingleSelection<String> dirShape = new ListSingleSelection<>("DIAMOND", "ELLIPSE", "HEXAGON", "OCTAGON", "RECTANGLE", "TRIANGLE");
+	
 	public ChopperNetworkTask(CyNetwork network, CyNetworkManager netMgr, CyNetworkFactory cnf, 
-				  CyNetworkNaming namingUtil, CyNetworkView viewNetwork, CyNetworkViewFactory viewFactory,
-			          CyNetworkViewManager viewManager){
+							 CyNetworkNaming namingUtil, CyNetworkView viewNetwork, CyNetworkViewFactory viewFactory,
+							 CyNetworkViewManager viewManager,CyLayoutAlgorithmManager cyLayoutManager){
 		
+		this.cyLayoutManager = cyLayoutManager;
 		this.network = network;
 		this.netMgr = netMgr;
 		this.cnf = cnf;
@@ -161,7 +186,8 @@ public class ChopperNetworkTask extends AbstractTask{
 		initializeChopper(network, K, alpha, query);
 		endTime = System.nanoTime();
 		totalTime = endTime - startTime;
-		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Initializing Chopper Runtime (in sec): " + ((double)(totalTime))/1000000000);
+		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Initializing Chopper Runtime (in sec): " + 
+							   ((double)(totalTime))/1000000000);
 		
 		
 		startTime = System.nanoTime();
@@ -206,11 +232,22 @@ public class ChopperNetworkTask extends AbstractTask{
 		efficientReDrawNetwork(topKList, query+1, directNeighborsN);
 		endTime = System.nanoTime();
 		totalTime = endTime - startTime;
-		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Redrawing Network (in sec): " + ((double)(totalTime))/1000000000);
+		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Redrawing Network (in sec): " + 
+							   ((double)(totalTime))/1000000000);
 		
 		taskMonitor.setTitle(" ");
 		taskMonitor.showMessage(TaskMonitor.Level.INFO, "Q-Node: Query Node (Selected Node)");
-		taskMonitor.showMessage(TaskMonitor.Level.INFO, "NDC: Not Directly Connected Node to both Top-(K-1) Results and Q-Node");
+		taskMonitor.showMessage(TaskMonitor.Level.INFO, 
+								"NDC: Not Directly Connected Node to both Top-(K-1) Results and Q-Node");
+		
+		CyLayoutAlgorithm cyLayoutAlgorithm = cyLayoutManager.getLayout("force-directed");
+		TaskIterator itr = cyLayoutAlgorithm.createTaskIterator(viewNetwork, 
+									cyLayoutAlgorithm.getDefaultLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
+	
+		Task selectionT = itr.next();
+		selectionT.run(taskMonitor);
+		viewNetwork.updateView();
+
 	}
 	
 	private void initializeChopper(CyNetwork network, int K, double alpha, int query) 
@@ -343,8 +380,8 @@ public class ChopperNetworkTask extends AbstractTask{
 			ErrorBound = ErrorBound * Xi;
 			muPPrevious = muPrevious;
 			muPrevious = mu;
-	        	mPPreviousScore = mPreviousScore;
-	        	mPreviousScore = mScore;
+	        mPPreviousScore = mPreviousScore;
+	        mPreviousScore = mScore;
 			
 			if (iter == MAXIT || ErrorBound < THRESHOLD){
 				break;
@@ -540,28 +577,199 @@ public class ChopperNetworkTask extends AbstractTask{
 		for(CyNode node: myNet.getNodeList()){
 			if(myNet.getRow(node).get(CyNetwork.NAME, String.class) == queryName){
 				View<CyNode> nodeView = viewNetwork.getNodeView(node);
-				nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, java.awt.Color.RED);
-				nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.DIAMOND);
+				try {
+					
+					switch(qColor.getSelectedValue()){
+						case "BLACK":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.BLACK);
+							break;
+						case "BLUE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.BLUE);
+							break;
+						case "CYAN":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.CYAN);
+							break;
+						case "GRAY":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.GRAY);
+							break;
+						case "MAGENTA":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.MAGENTA);
+							break;
+						case "ORANGE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.ORANGE);
+							break;
+						case "RED":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.RED);
+							break;
+						default:
+							System.out.println("Not filled.");
+					}
+					
+					switch(qShape.getSelectedValue()){
+						case "ELLIPSE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ELLIPSE);
+							break;
+						case "DIAMOND":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.DIAMOND);
+							break;
+						case "HEXAGON":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.HEXAGON);
+							break;
+						case "OCTAGON":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.OCTAGON);
+							break;
+						case "RECTANGLE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.RECTANGLE);
+							break;
+						case "TRIANGLE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.TRIANGLE);
+							break;
+						case "RED":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.TRIANGLE);
+							break;
+						default:
+							System.out.println("Not filled.");
+							break;
+					}
+					
+				} catch (SecurityException e) {
+					e.printStackTrace();
+				}
+				
 				viewNetwork.updateView();
 				viewManager.addNetworkView(viewNetwork);
-				//break;
+
 			} else if (resultList.contains(Integer.parseInt(myNet.getRow(node).get(CyNetwork.NAME, String.class)))) {
 				View<CyNode> nodeView = viewNetwork.getNodeView(node);
-				nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, java.awt.Color.BLUE);
-				nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.TRIANGLE);
+				try {
+					
+					switch(topColor.getSelectedValue()){
+						case "BLACK":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.BLACK);
+							break;
+						case "BLUE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.BLUE);
+							break;
+						case "CYAN":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.CYAN);
+							break;
+						case "GRAY":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.GRAY);
+							break;
+						case "MAGENTA":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.MAGENTA);
+							break;
+						case "ORANGE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.ORANGE);
+							break;
+						case "RED":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.RED);
+							break;
+						default:
+							System.out.println("Not filled.");
+							break;
+					}
+					
+					switch(topShape.getSelectedValue()){
+						case "ELLIPSE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ELLIPSE);
+							break;
+						case "DIAMOND":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.DIAMOND);
+							break;
+						case "HEXAGON":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.HEXAGON);
+							break;
+						case "OCTAGON":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.OCTAGON);
+							break;
+						case "RECTANGLE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.RECTANGLE);
+							break;
+						case "TRIANGLE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.TRIANGLE);
+							break;
+						case "RED":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.TRIANGLE);
+							break;
+						default:
+							System.out.println("Not filled.");
+							break;
+					}
+					
+				} catch (SecurityException e) {
+					e.printStackTrace();
+				}
+
 				viewNetwork.updateView();
 				viewManager.addNetworkView(viewNetwork);
+				
 			} else {
 				View<CyNode> nodeView = viewNetwork.getNodeView(node);
-				nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, java.awt.Color.GREEN);
-				nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.TRIANGLE);
-				viewNetwork.updateView();
-				viewManager.addNetworkView(viewNetwork);
-			}
-			
-		}	
+				try {
+					
+					switch(dirColor.getSelectedValue()){
+						case "BLACK":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.BLACK);
+							break;
+						case "BLUE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.BLUE);
+							break;
+						case "CYAN":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.CYAN);
+							break;
+						case "GRAY":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.GRAY);
+							break;
+						case "MAGENTA":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.MAGENTA);
+							break;
+						case "ORANGE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.ORANGE);
+							break;
+						case "RED":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, Color.RED);
+							break;
+						default:
+							System.out.println("Not filled.");
+							break;
+					}
+					
+					switch(dirShape.getSelectedValue()){
+						case "ELLIPSE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.ELLIPSE);
+							break;
+						case "DIAMOND":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.DIAMOND);
+							break;
+						case "HEXAGON":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.HEXAGON);
+							break;
+						case "OCTAGON":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.OCTAGON);
+							break;
+						case "RECTANGLE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.RECTANGLE);
+							break;
+						case "TRIANGLE":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.TRIANGLE);
+							break;
+						case "RED":
+							nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.TRIANGLE);
+							break;
+						default:
+							System.out.println("Not filled.");
+							break;
+					}
+					
+				} catch (SecurityException e) {
+					e.printStackTrace();
+				}
 
+				viewNetwork.updateView();
+				viewManager.addNetworkView(viewNetwork);	
+			}
+		}	
 		netMgr.addNetwork(myNet);
-		
 	}
 }
