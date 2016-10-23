@@ -6,9 +6,9 @@ Case Western Reserve University, Cleveland, OH. <br />
 <br />
 **Update**: In addition to Q-Node and its Top-K result, direct neighbours of Q-Node can be visualized. <br />
 Despite the old version, Q-Node will be coloured with Red and Diamond shape. <br />
-Top-K nodes will be coloured with Blue and Direct-Neighbours will be coloured with Green both in a Triangular shape. <br />
+Top-K nodes will be coloured with Blue and Direct-Neighbours will be coloured with Green both in a Triangle. <br />
+
 
 <p align="center">
-![Screenshot](ExampleNetwork.png)
-
+  <img src="https://github.com/ugurcanaytar/CWRU_Chopper_Cytoscape/blob/master/ExampleNetwork.png""/>
 </p>
