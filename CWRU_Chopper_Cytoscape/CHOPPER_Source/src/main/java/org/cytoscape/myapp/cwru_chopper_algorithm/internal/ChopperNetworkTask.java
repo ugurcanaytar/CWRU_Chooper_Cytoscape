@@ -39,6 +39,12 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.session.CyNetworkNaming;
+import org.cytoscape.view.model.CyNetworkView;
+import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.View;
+import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.presentation.property.NodeShapeVisualProperty;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
@@ -54,7 +60,7 @@ import cern.colt.matrix.doublealgo.Sorting;
 
 /*
  * 
- * 		      /\ PARALLEL COLT PACKAGES /\
+ * 				/\ PARALLEL COLT PACKAGES /\
 	import cern.colt.function.tdouble.DoubleDoubleFunction;
 	import cern.colt.matrix.tdouble.DoubleMatrix1D;
 	import cern.colt.matrix.tdouble.impl.DenseDoubleMatrix1D;
@@ -79,6 +85,10 @@ public class ChopperNetworkTask extends AbstractTask{
 	private final CyNetworkManager netMgr;
 	private final CyNetworkFactory cnf;
 	private final CyNetworkNaming namingUtil;
+	private CyNetworkView viewNetwork;
+	private CyNetworkViewFactory viewFactory;
+	private CyNetworkViewManager viewManager;
+	
 	
 	/* IN-EQUATION PARAMETERS */
 	
@@ -127,13 +137,17 @@ public class ChopperNetworkTask extends AbstractTask{
 	@Tunable(description= "Enter K: ", groups={"Top-K Result"})
 	public int K = 10;
 	
-	public ChopperNetworkTask(CyNetwork network, CyNetworkManager netMgr, 
-				  CyNetworkFactory cnf, CyNetworkNaming namingUtil){
+	public ChopperNetworkTask(CyNetwork network, CyNetworkManager netMgr, CyNetworkFactory cnf, 
+							 CyNetworkNaming namingUtil, CyNetworkView viewNetwork, CyNetworkViewFactory viewFactory,
+							 CyNetworkViewManager viewManager){
 		
 		this.network = network;
 		this.netMgr = netMgr;
 		this.cnf = cnf;
 		this.namingUtil = namingUtil;
+		this.viewNetwork = viewNetwork;
+		this.viewFactory = viewFactory;
+		this.viewManager = viewManager;
 		
 	}
 	
@@ -147,14 +161,16 @@ public class ChopperNetworkTask extends AbstractTask{
 		initializeChopper(network, K, alpha, query);
 		endTime = System.nanoTime();
 		totalTime = endTime - startTime;
-		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Initializing Chopper Runtime (in sec): " + ((double)(totalTime))/1000000000);
+		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Initializing Chopper Runtime (in sec): " + 
+							   ((double)(totalTime))/1000000000);
 		
 		
 		startTime = System.nanoTime();
 		DoubleMatrix1D res = (calculateChopper().viewSorted()).viewFlip();
 		endTime = System.nanoTime();
 		totalTime = endTime - startTime;
-		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Chopper Algorithm Runtime (in sec): " + ((double)(totalTime))/1000000000);
+		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Chopper Algorithm Runtime (in sec): " + 
+		                       ((double)(totalTime))/1000000000);
 		
 		taskMonitor.setTitle(" ");
 		
@@ -170,17 +186,38 @@ public class ChopperNetworkTask extends AbstractTask{
 		taskMonitor.showMessage(TaskMonitor.Level.INFO, "Redrawing the Top-K Network for Node: " + (query+1));
 		startTime = System.nanoTime();
 		//reDrawNetwork(topKList, query+1);
-		efficientReDrawNetwork(topKList, query+1);
+		List<Integer> directNeighborsN = new ArrayList<Integer>();
+		List<CyNode> directNeighbors = new ArrayList<CyNode>();
+		
+		for(CyNode n: network.getNodeList()){
+			if(Integer.parseInt(network.getRow(n).get(CyNetwork.NAME, String.class)) == (query+1)){
+				directNeighbors = network.getNeighborList(n, CyEdge.Type.ANY);
+				break;
+			}
+		}
+		
+		for(CyNode n: directNeighbors){
+			if(topKList.contains(Integer.parseInt(network.getRow(n).get(CyNetwork.NAME, String.class)))){
+				continue;
+			} else {
+				directNeighborsN.add(Integer.parseInt(network.getRow(n).get(CyNetwork.NAME, String.class)));
+			}
+		}
+				
+		efficientReDrawNetwork(topKList, query+1, directNeighborsN);
 		endTime = System.nanoTime();
 		totalTime = endTime - startTime;
-		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Redrawing Network (in sec): " + ((double)(totalTime))/1000000000);
+		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Redrawing Network (in sec): " + 
+							   ((double)(totalTime))/1000000000);
 		
 		taskMonitor.setTitle(" ");
 		taskMonitor.showMessage(TaskMonitor.Level.INFO, "Q-Node: Query Node (Selected Node)");
-		taskMonitor.showMessage(TaskMonitor.Level.INFO, "NDC: Not Directly Connected Node to both Top-(K-1) Results and Q-Node");
+		taskMonitor.showMessage(TaskMonitor.Level.INFO, 
+								"NDC: Not Directly Connected Node to both Top-(K-1) Results and Q-Node");
 	}
 	
-	private void initializeChopper(CyNetwork network, int K, double alpha, int query) throws FileNotFoundException, IOException {
+	private void initializeChopper(CyNetwork network, int K, double alpha, int query) 
+				throws FileNotFoundException, IOException {
 		
 		// Initialization of values, vectors and adjacency matrix.
 		sizeNetwork = network.getNodeCount();
@@ -309,8 +346,8 @@ public class ChopperNetworkTask extends AbstractTask{
 			ErrorBound = ErrorBound * Xi;
 			muPPrevious = muPrevious;
 			muPrevious = mu;
-	        	mPPreviousScore = mPreviousScore;
-	        	mPreviousScore = mScore;
+	        mPPreviousScore = mPreviousScore;
+	        mPreviousScore = mScore;
 			
 			if (iter == MAXIT || ErrorBound < THRESHOLD){
 				break;
@@ -360,7 +397,7 @@ public class ChopperNetworkTask extends AbstractTask{
 		
 		resultMatHelper = Sorting.quickSort.sort(mScore);
 		/*
-		 * 		Sorting at Parallel Colt
+		 * 			Sorting at Parallel Colt
 		 * resultMatHelper = DoubleSorting.mergeSort.sort(mScore2);
 		 * 
 		 */
@@ -386,7 +423,7 @@ public class ChopperNetworkTask extends AbstractTask{
 		DoubleMatrix1D sortedVec = new DenseDoubleMatrix1D(sizeNetwork);
 		sortedVec = Sorting.quickSort.sort(finalVec);
 		/*
-		 * 		Sorting at Parallel Colt
+		 * 			Sorting at Parallel Colt
 		 * sortedVec = DoubleSorting.mergeSort.sort(finalVec);
 		 * 
 		 */
@@ -396,6 +433,7 @@ public class ChopperNetworkTask extends AbstractTask{
 	}
 	
 	@SuppressWarnings("unused")
+	
 	private void reDrawNetwork(final List<Integer> resultList, final int query){
 		
 		CyTable nodeTable = network.getDefaultNodeTable();
@@ -425,7 +463,8 @@ public class ChopperNetworkTask extends AbstractTask{
 		CyTable edgeTable = network.getDefaultEdgeTable();
 		List<CyEdge> edgeList = network.getEdgeList();
 		for(CyEdge edge: edgeList){
-			if(edge.getSource() == queryNode || edge.getTarget() == queryNode || nodes.contains(edge.getTarget()) || nodes.contains(edge.getSource())){
+			if(edge.getSource() == queryNode || edge.getTarget() == queryNode || 
+			   nodes.contains(edge.getTarget()) || nodes.contains(edge.getSource())){
 				continue;
 			} 
 			else {
@@ -437,14 +476,14 @@ public class ChopperNetworkTask extends AbstractTask{
 		}
 	}
 	
-	private void efficientReDrawNetwork(final List<Integer> resultList, final int query){
+	private void efficientReDrawNetwork(final List<Integer> resultList, final int query, final List<Integer> directNeighborsN){
 		
 		nodes = new ArrayList<CyNode>();
 		ListMultimap<String, String> nodeMap = ArrayListMultimap.create();
 		List<String> nodeNames = new ArrayList<String>();
 		String queryName = "";
 		for(CyNode node: network.getNodeList()){
-			if (resultList.contains(Integer.parseInt(network.getRow(node).get(CyNetwork.NAME, String.class)))){
+			if (resultList.contains(Integer.parseInt(network.getRow(node).get(CyNetwork.NAME, String.class))) || directNeighborsN.contains(Integer.parseInt(network.getRow(node).get(CyNetwork.NAME, String.class)))){
 				nodes.add(node);
 				nodeNames.add(network.getRow(node).get(CyNetwork.NAME, String.class));
 			} 
@@ -470,16 +509,18 @@ public class ChopperNetworkTask extends AbstractTask{
 		myNet = cnf.createNetwork();
 		myNet.getRow(myNet).set(CyNetwork.NAME, namingUtil.getSuggestedNetworkTitle("Result Network"));
 		
+		queryNode = myNet.addNode();
+		myNet.getDefaultNodeTable().getRow(queryNode.getSUID()).set("name", queryName);
 		
+		
+		netMgr.addNetwork(myNet);
 		int j = 0;
 		for(CyNode node: nodes){
 			node = myNet.addNode();
 			myNet.getDefaultNodeTable().getRow(node.getSUID()).set("name", nodeNames.get(j++));
 		}
 		
-		queryNode = myNet.addNode();
-		myNet.getDefaultNodeTable().getRow(queryNode.getSUID()).set("name", queryName);
-
+		
 		for(CyNode n: myNet.getNodeList()){
 			List<String> map = nodeMap.get(myNet.getRow(n).get(CyNetwork.NAME, String.class));
 			for(CyNode n2: myNet.getNodeList()){
@@ -493,12 +534,37 @@ public class ChopperNetworkTask extends AbstractTask{
 			if(myNet.getNeighborList(n, CyEdge.Type.ANY).size() > 0){
 				continue;
 			} else {
-				myNet.getDefaultNodeTable().getRow(n.getSUID()).set("name", myNet.getRow(n).get(CyNetwork.NAME, String.class) + " (NDC)");
+				myNet.getDefaultNodeTable().getRow(n.getSUID()).set("name", myNet.getRow(n).get(CyNetwork.NAME, String.class));
 				myNet.addEdge(n, queryNode, false);
 			}
 		}
 		
-		myNet.getDefaultNodeTable().getRow(queryNode.getSUID()).set("name", "Q-Node: " + queryName);
+		viewNetwork = viewFactory.createNetworkView(myNet);
+		for(CyNode node: myNet.getNodeList()){
+			if(myNet.getRow(node).get(CyNetwork.NAME, String.class) == queryName){
+				View<CyNode> nodeView = viewNetwork.getNodeView(node);
+				nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, java.awt.Color.RED);
+				nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.DIAMOND);
+				viewNetwork.updateView();
+				viewManager.addNetworkView(viewNetwork);
+				//break;
+			} else if (resultList.contains(Integer.parseInt(myNet.getRow(node).get(CyNetwork.NAME, String.class)))) {
+				View<CyNode> nodeView = viewNetwork.getNodeView(node);
+				nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, java.awt.Color.BLUE);
+				nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.TRIANGLE);
+				viewNetwork.updateView();
+				viewManager.addNetworkView(viewNetwork);
+			} else {
+				View<CyNode> nodeView = viewNetwork.getNodeView(node);
+				nodeView.setVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR, java.awt.Color.GREEN);
+				nodeView.setVisualProperty(BasicVisualLexicon.NODE_SHAPE, NodeShapeVisualProperty.TRIANGLE);
+				viewNetwork.updateView();
+				viewManager.addNetworkView(viewNetwork);
+			}
+			
+		}	
+
 		netMgr.addNetwork(myNet);
+		
 	}
 }
