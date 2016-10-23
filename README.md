@@ -1,4 +1,4 @@
-# CHOPPER Plug-in
+# CHOPPER Cytoscape Plug-in
 
 **Advisor: Prof. Mehmet Koyutürk** <br />
 **Supervisor: Mustafa Coşkun, Ph.D.** <br />
