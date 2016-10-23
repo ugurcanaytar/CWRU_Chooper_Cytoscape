@@ -138,8 +138,8 @@ public class ChopperNetworkTask extends AbstractTask{
 	public int K = 10;
 	
 	public ChopperNetworkTask(CyNetwork network, CyNetworkManager netMgr, CyNetworkFactory cnf, 
-							 CyNetworkNaming namingUtil, CyNetworkView viewNetwork, CyNetworkViewFactory viewFactory,
-							 CyNetworkViewManager viewManager){
+				  CyNetworkNaming namingUtil, CyNetworkView viewNetwork, CyNetworkViewFactory viewFactory,
+			          CyNetworkViewManager viewManager){
 		
 		this.network = network;
 		this.netMgr = netMgr;
@@ -161,8 +161,7 @@ public class ChopperNetworkTask extends AbstractTask{
 		initializeChopper(network, K, alpha, query);
 		endTime = System.nanoTime();
 		totalTime = endTime - startTime;
-		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Initializing Chopper Runtime (in sec): " + 
-							   ((double)(totalTime))/1000000000);
+		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Initializing Chopper Runtime (in sec): " + ((double)(totalTime))/1000000000);
 		
 		
 		startTime = System.nanoTime();
@@ -207,13 +206,11 @@ public class ChopperNetworkTask extends AbstractTask{
 		efficientReDrawNetwork(topKList, query+1, directNeighborsN);
 		endTime = System.nanoTime();
 		totalTime = endTime - startTime;
-		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Redrawing Network (in sec): " + 
-							   ((double)(totalTime))/1000000000);
+		taskMonitor.showMessage(TaskMonitor.Level.WARN, "Redrawing Network (in sec): " + ((double)(totalTime))/1000000000);
 		
 		taskMonitor.setTitle(" ");
 		taskMonitor.showMessage(TaskMonitor.Level.INFO, "Q-Node: Query Node (Selected Node)");
-		taskMonitor.showMessage(TaskMonitor.Level.INFO, 
-								"NDC: Not Directly Connected Node to both Top-(K-1) Results and Q-Node");
+		taskMonitor.showMessage(TaskMonitor.Level.INFO, "NDC: Not Directly Connected Node to both Top-(K-1) Results and Q-Node");
 	}
 	
 	private void initializeChopper(CyNetwork network, int K, double alpha, int query) 
@@ -346,8 +343,8 @@ public class ChopperNetworkTask extends AbstractTask{
 			ErrorBound = ErrorBound * Xi;
 			muPPrevious = muPrevious;
 			muPrevious = mu;
-	        mPPreviousScore = mPreviousScore;
-	        mPreviousScore = mScore;
+	        	mPPreviousScore = mPreviousScore;
+	        	mPreviousScore = mScore;
 			
 			if (iter == MAXIT || ErrorBound < THRESHOLD){
 				break;
