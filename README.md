@@ -1,6 +1,6 @@
 # CHOPPER Cytoscape Plug-in
 
-**Advisor: T. & A. Schroeder Associate Professor Mehmet Koyutürk** <br />
+**Advisor: Mehmet Koyutürk, T. & A. Schroeder Associate Professor** <br />
 **Supervisor: Mustafa Coşkun, Ph.D. Candidate** <br />
 **Author: Ugurcan Aytar, Senior Computer Science Student at Bilkent University** <br />
 *Department of Electrical Engineering and Computer Science*<br/>
