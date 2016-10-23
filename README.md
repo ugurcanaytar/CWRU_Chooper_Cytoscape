@@ -1,9 +1,10 @@
 # CHOPPER Cytoscape Plug-in
 
-**Advisor: Prof. Mehmet Koyutürk** <br />
-**Supervisor: Mustafa Coşkun, Ph.D.** <br />
+**Advisor: T. & A. Schroeder Associate Professor Mehmet Koyutürk** <br />
+**Supervisor: Mustafa Coşkun, Ph.D. Candidate** <br />
 **Author: Ugurcan Aytar, Senior Computer Science Student at Bilkent University** <br />
-*Case Western Reserve University, Cleveland, OH.* <br />
+*Department of Electrical Engineering and Computer Science*<br/>
+Case Western Reserve University, Cleveland, OH. <br />
 
 **Work Done:** <br />
 Efficient processing of network proximityqueries via Chebyshev acceleration. <br />
