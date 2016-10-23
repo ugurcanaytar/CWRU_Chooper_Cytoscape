@@ -43,12 +43,12 @@ public class ChopperNetworkTaskFactory implements NetworkTaskFactory {
 	private CyNetworkViewManager viewManager;
 	
 	public ChopperNetworkTaskFactory(CyNetwork cN, 
-									final CyNetworkManager netMgr, 
-									final CyNetworkNaming namingUtil,
-									final CyNetworkFactory cnf,
-									CyNetworkView viewNetwork,
-									CyNetworkViewFactory viewFactory,
-									CyNetworkViewManager viewManager){
+					final CyNetworkManager netMgr, 
+					final CyNetworkNaming namingUtil,
+					final CyNetworkFactory cnf,
+					CyNetworkView viewNetwork,
+					CyNetworkViewFactory viewFactory,
+					CyNetworkViewManager viewManager){
 		
 		this.netMgr = netMgr;
 		this.namingUtil = namingUtil;
